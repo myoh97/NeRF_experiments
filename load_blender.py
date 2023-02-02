@@ -34,12 +34,18 @@ def pose_spherical(theta, phi, radius):
     return c2w
 
 
-def load_blender_data(basedir, half_res=False, testskip=1):
+def load_blender_data(basedir, half_res=False, testskip=1, rgb='rgb'):
     splits = ['train', 'val', 'test']
     metas = {}
     for s in splits:
         with open(os.path.join(basedir, 'transforms_{}.json'.format(s)), 'r') as fp:
             metas[s] = json.load(fp)
+    if rgb == 'rgb' : colors = [2,1,0,3]
+    elif rgb == 'rbg': colors = [2,0,1,3]
+    elif rgb == 'gbr': colors = [1,2,0,3]
+    elif rgb == 'grb': colors = [1,0,2,3]
+    elif rgb == 'brg': colors = [0,2,1,3]
+    elif rgb == 'bgr': colors = [0,1,2,3]
 
     all_imgs = []
     all_poses = []
@@ -55,7 +61,10 @@ def load_blender_data(basedir, half_res=False, testskip=1):
             
         for frame in meta['frames'][::skip]:
             fname = os.path.join(basedir, frame['file_path'] + '.png')
-            imgs.append(imageio.imread(fname))
+            src = imageio.imread(fname)
+            src = np.array(src)
+            src = src[..., colors]
+            imgs.append(src)
             poses.append(np.array(frame['transform_matrix']))
         imgs = (np.array(imgs) / 255.).astype(np.float32) # keep all 4 channels (RGBA)
         poses = np.array(poses).astype(np.float32)
@@ -75,9 +84,9 @@ def load_blender_data(basedir, half_res=False, testskip=1):
     render_poses = torch.stack([pose_spherical(angle, -30.0, 4.0) for angle in np.linspace(-180,180,40+1)[:-1]], 0)
     
     if half_res:
-        H = H//2
-        W = W//2
-        focal = focal/2.
+        H = H//8
+        W = W//8
+        focal = focal/8.
 
         imgs_half_res = np.zeros((imgs.shape[0], H, W, 4))
         for i, img in enumerate(imgs):

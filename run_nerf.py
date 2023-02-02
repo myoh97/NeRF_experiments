@@ -18,6 +18,10 @@ from load_deepvoxels import load_dv_data
 from load_blender import load_blender_data
 from load_LINEMOD import load_LINEMOD_data
 
+import matplotlib
+matplotlib.use('Agg')
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 np.random.seed(0)
@@ -168,7 +172,6 @@ def render_path(render_poses, hwf, K, chunk, render_kwargs, gt_imgs=None, savedi
             filename = os.path.join(savedir, '{:03d}.png'.format(i))
             imageio.imwrite(filename, rgb8)
 
-
     rgbs = np.stack(rgbs, 0)
     disps = np.stack(disps, 0)
 
@@ -233,7 +236,26 @@ def create_nerf(args):
             model_fine.load_state_dict(ckpt['network_fine_state_dict'])
 
     ##########################
-
+    
+    # toy
+    # ckpt_lego = torch.load('./logs/blender_paper_lego/200000.tar')['network_fine_state_dict']
+    # ckpt_chair = torch.load('./logs/blender_paper_chair/200000.tar')['network_fine_state_dict']
+    # ckpt_drums = torch.load('./logs/blender_paper_drums/200000.tar')['network_fine_state_dict']
+    # keys = ckpt_lego.keys()
+    # labels=['lego', 'chair', 'drums']
+    # colors=['red', 'blue', 'green']
+    
+    # plt.figure(figsize=(120,8*24))
+    # for idx, k in enumerate(keys):
+    #     plt.subplot(24, 1, idx+1)
+    #     plt.title(k)
+    #     for i, c in enumerate([ckpt_lego, ckpt_chair, ckpt_drums]):
+    #         # sns.scatterplot(c[k].flatten().cpu().numpy(), label=labels[i], color=colors[i], alpha=0.1)
+    #         plt.plot(c[k].flatten().cpu().numpy(), label=labels[i], color=colors[i], alpha=0.7)
+    #         # plt.hist(c[k].flatten().cpu().numpy(), alpha=1, bins=100, label=labels[i], color=colors[i], histtype='step')
+    #         plt.legend()
+    # plt.savefig('5.png')
+        
     render_kwargs_train = {
         'network_query_fn' : network_query_fn,
         'perturb' : args.perturb,
@@ -431,6 +453,8 @@ def config_parser():
     parser.add_argument("--datadir", type=str, default='./data/llff/fern', 
                         help='input data directory')
 
+    parser.add_argument('--rgb', type=str, help='rgb order', default='rgb')
+    
     # training options
     parser.add_argument("--netdepth", type=int, default=8, 
                         help='layers in network')
@@ -567,7 +591,7 @@ def train():
         print('NEAR FAR', near, far)
 
     elif args.dataset_type == 'blender':
-        images, poses, render_poses, hwf, i_split = load_blender_data(args.datadir, args.half_res, args.testskip)
+        images, poses, render_poses, hwf, i_split = load_blender_data(args.datadir, args.half_res, args.testskip, args.rgb)
         print('Loaded blender', images.shape, render_poses.shape, hwf, args.datadir)
         i_train, i_val, i_test = i_split
 
