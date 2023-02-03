@@ -536,7 +536,6 @@ def config_parser():
 
 
 def train():
-
     parser = config_parser()
     args = parser.parse_args()
 
@@ -808,7 +807,8 @@ def train():
             with torch.no_grad():
                 rgbs, disps = render_path(render_poses, hwf, K, args.chunk, render_kwargs_test)
             print('Done, saving', rgbs.shape, disps.shape)
-            moviebase = os.path.join(basedir, expname, '{}_spiral_{:06d}_'.format(expname, i))
+            category = os.path.basename(args.config).split('.')[0]
+            moviebase = os.path.join(basedir, expname, '{}_spiral_{:06d}_'.format(category, i))
             imageio.mimwrite(moviebase + 'rgb.mp4', to8b(rgbs), fps=30, quality=10)
             imageio.mimwrite(moviebase + 'disp.mp4', to8b(disps / np.max(disps)), fps=30, quality=10)
 
