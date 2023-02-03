@@ -234,27 +234,6 @@ def create_nerf(args):
         model.load_state_dict(ckpt['network_fn_state_dict'])
         if model_fine is not None:
             model_fine.load_state_dict(ckpt['network_fine_state_dict'])
-
-    ##########################
-    
-    # toy
-    # ckpt_lego = torch.load('./logs/blender_paper_lego/200000.tar')['network_fine_state_dict']
-    # ckpt_chair = torch.load('./logs/blender_paper_chair/200000.tar')['network_fine_state_dict']
-    # ckpt_drums = torch.load('./logs/blender_paper_drums/200000.tar')['network_fine_state_dict']
-    # keys = ckpt_lego.keys()
-    # labels=['lego', 'chair', 'drums']
-    # colors=['red', 'blue', 'green']
-    
-    # plt.figure(figsize=(120,8*24))
-    # for idx, k in enumerate(keys):
-    #     plt.subplot(24, 1, idx+1)
-    #     plt.title(k)
-    #     for i, c in enumerate([ckpt_lego, ckpt_chair, ckpt_drums]):
-    #         # sns.scatterplot(c[k].flatten().cpu().numpy(), label=labels[i], color=colors[i], alpha=0.1)
-    #         plt.plot(c[k].flatten().cpu().numpy(), label=labels[i], color=colors[i], alpha=0.7)
-    #         # plt.hist(c[k].flatten().cpu().numpy(), alpha=1, bins=100, label=labels[i], color=colors[i], histtype='step')
-    #         plt.legend()
-    # plt.savefig('5.png')
         
     render_kwargs_train = {
         'network_query_fn' : network_query_fn,
