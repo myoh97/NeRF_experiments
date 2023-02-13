@@ -8,7 +8,7 @@ import os.path as osp
 import sys
 import torch
 import torch.nn.functional as F
-from utils import *
+# from utils import *
 
 prefix = '/root/dataset/NeRF/nerf_parameter'
 classes = ['lego', 'chair', 'drums', 'ficus', 'hotdog', 'materials', 'mic', 'ship']
@@ -30,7 +30,6 @@ for phase in phases:
                 tmp = eval(f"{cls}_{phase}_{color}_{iter}"); break;
 
 keys = list(weights[0].keys())
-
 
 print(lego_train_rgb_050000)
 
