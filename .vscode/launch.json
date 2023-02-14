@@ -38,6 +38,15 @@
             "env": {"CUDA_VISIBLE_DEVICES":"0"},
             "console": "integratedTerminal",
             "justMyCode": true
+        },
+        {
+            "name": "!!!!train",
+            "type": "python",
+            "request": "launch",
+            "program": "classification/train.py",
+            "env": {"CUDA_VISIBLE_DEVICES":"8"},
+            "console": "integratedTerminal",
+            "justMyCode": true
         }
 
     ]
