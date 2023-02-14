@@ -44,7 +44,7 @@
             "type": "python",
             "request": "launch",
             "program": "classification/train.py",
-            "env": {"CUDA_VISIBLE_DEVICES":"8"},
+            "env": {"CUDA_VISIBLE_DEVICES":"4"},
             "console": "integratedTerminal",
             "justMyCode": true
         }
