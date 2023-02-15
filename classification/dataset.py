@@ -3,6 +3,7 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 import glob
+import numpy as np
 
 class_dict = {
     "chair":0,
@@ -32,7 +33,7 @@ class NeRFDataset(Dataset):
         self.param_list = ['050000.tar','060000.tar','070000.tar','080000.tar','090000.tar','100000.tar']
         self.train_path = "/root/dataset/NeRF/nerf_parameter/val/*/"
         self.val_path = "/root/dataset/NeRF/nerf_parameter/train/*/"
-        self.train = 'train' if train==True else 'validation'
+        self.phase = 'train' if train==True else 'validation'
         
         if train == True:
             self.dir_list = glob.glob(self.train_path)
@@ -47,13 +48,16 @@ class NeRFDataset(Dataset):
             for r in self.rgb_list:
                 for p in self.param_list:
                     ckpt = dict(torch.load(d+r+p, map_location=torch.device('cpu'))['network_fine_state_dict'])
-                    w = torch.cat([ckpt[key].flatten() for key in ckpt.keys() if key.split('.')[-1] == 'weight'])
-                    b = torch.cat([ckpt[key].flatten() for key in ckpt.keys() if key.split('.')[-1] == 'bias'])
-                    t = torch.Tensor([class_dict[d.split('/')[-2]]]).type(torch.LongTensor)
+                    ckpt_ = dict()
+                    for key in ckpt.keys():
+                        ckpt_[key] = ckpt[key].numpy().flatten()
+                    w = np.concatenate([ckpt_[key] for key in ckpt.keys() if key.split('.')[-1] == 'weight'])
+                    b = np.concatenate([ckpt_[key] for key in ckpt.keys() if key.split('.')[-1] == 'bias'])
+                    t = class_dict[d.split('/')[-2]]
                     self.weights.append(w)
                     self.biases.append(b)
                     self.targets.append(t)
-        print(f"Loaded {len(self.weights)} trained models for {self.train}")
+        print(f"Loaded {len(self.weights)} trained models for {self.phase}")
         
     def __len__(self):
         return len(self.weights)
@@ -84,7 +88,12 @@ class NeRFDataset(Dataset):
             return torch.Tensor([7]).type(torch.LongTensor)
 
     def __getitem__(self, idx):
-        return self.weights[idx], self.biases[idx], self.targets[idx]
+        
+        w = torch.as_tensor(self.weights[idx], dtype=torch.float32)
+        b = torch.as_tensor(self.biases[idx], dtype=torch.float32)
+        t = torch.as_tensor(self.targets[idx], dtype=torch.int64)
+        
+        return w, b, t
         # x = self.data_list[idx]
         # weight = torch.load(x)#, map_location='cpu'
         # param = dict(weight["network_fine_state_dict"])
