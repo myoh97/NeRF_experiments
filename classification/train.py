@@ -11,14 +11,14 @@ from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 
 class_dict = {
-    "chair":0,
-    "drums":1,
-    "ficus":2,
-    "hotdog":3,
-    "lego":4,
-    "materials":5,
-    "mic":6,
-    "ship":7
+    0:"chair",
+    1:"drums",
+    2:"ficus",
+    3:"hotdog",
+    4:"lego",
+    5:"materials",
+    6:"mic",
+    7:"ship"
     }
 
 def train(args):
@@ -84,14 +84,15 @@ def train(args):
             target = target.to(device).reshape(-1)
             pred = model(weight, bias)
         
-            _, predicted = torch.max(pred, 1)
+            prob = F.softmax(pred, dim=-1)
+            max_idx, predicted = torch.max(pred, 1)
             acc_v = torch.sum(predicted==target) / target.shape[0]
             
             if iter % 100 == 0:
                 print("================================")
                 print("prediction\t target\n")
-                for p, t in zip(predicted, target):
-                    print(f"{class_dict[p]}\t{class_dict[t]}")
+                for p, t, pr, i in zip(predicted, target, prob, max_idx):
+                    print(f"{class_dict[p.item()]}({pr[p]:.2f})\t{class_dict[t.item()]}")
                 print("================================")
                 
             val_loss = loss_func(pred, target)
