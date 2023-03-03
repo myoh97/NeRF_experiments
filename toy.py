@@ -19,6 +19,7 @@ phases = ['train', 'val']
 mod = sys.modules[__name__] 
 
 weights = []
+
 # Load weights : "{class}_{phase}_{color}_{iter}"
 for phase in phases:
     for cls in classes:

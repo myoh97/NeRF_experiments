@@ -1,1 +1,1 @@
-CUDA_VISIBLE_DEVICES=8 python train.py --model fc --exp baseline --iter 1500
+CUDA_VISIBLE_DEVICES=0 python train.py --model light --exp light --iter 1500

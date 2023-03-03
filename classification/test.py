@@ -21,7 +21,6 @@ class_dict = {
     7:"ship"
     }
 
-
 def test(args):
     device = torch.device('cuda:0')
     
@@ -53,13 +52,12 @@ def test(args):
         pred = model(weight, bias)
     
         prob = F.softmax(pred, dim=-1)
-        max_idx, predicted = torch.max(pred, 1)
+        _, predicted = torch.max(pred, 1)
         acc_v = torch.sum(predicted==target) / target.shape[0]
         
-    
         print("================================")
         print("prediction\t target\n")
-        for p, t, pr, i in zip(predicted, target, prob, max_idx):
+        for p, t, pr in zip(predicted, target, prob):
             print(f"{class_dict[p.item()]}({pr[p]:.2f})\t{class_dict[t.item()]}")
         print("================================")
         

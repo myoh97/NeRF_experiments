@@ -27,20 +27,11 @@ def train(args):
     bs = args.bs
     n_iter = args.iter
     
-    if args.model == 'fc' : model = FCLayer(batchsize=bs).to(device)
-    elif args.model =='fc_drop': model = FCLayer_dropout(batchsize=bs).to(device)
-    elif args.model =='fc_light': model = FCLayer_light(batchsize=bs).to(device)
-    elif args.model =='fc_heavy': model = FCLayer_heavy(batchsize=bs).to(device)
-    elif args.model =='fc_bn': model = FCLayer_BN(batchsize=bs).to(device)
-    elif args.model =='fc_in': model = FCLayer_IN(batchsize=bs).to(device)
-    elif args.model =='fc_bn_drop': model = FCLayer_BN(batchsize=bs).to(device)
-    elif args.model =='fc_in_drop': model = FCLayer_IN_dropout(batchsize=bs).to(device)
+    if args.model == 'base' : model = Baseline().to(device)
+    elif args.model == 'light' : model = Baseline_light().to(device)
+    elif args.model == 'light_drop' : model = Baseline_light_drop().to(device)
 
     save_dir = f"results/{args.exp}/{args.model}_bs{bs}_iter{n_iter}"
-    
-    # weight = torch.randn((288, 593408)).cuda()
-    # bias = torch.randn((288, 2436)).cuda()
-    # target = torch.tensor(0).cuda().repeat(288)
     
     train_dataset = NeRFDataset(train=True)
     val_dataset = NeRFDataset(train=False)
@@ -67,8 +58,14 @@ def train(args):
             bias = bias.to(device).requires_grad_()
             target = target.to(device).reshape(-1)
             
+            if args.normalize:
+                weight -= weight.min(1, keepdim=True)[0]
+                weight /= weight.max(1, keepdim=True)[0]
+                bias -= bias.min(1, keepdim=True)[0]
+                bias /= bias.max(1, keepdim=True)[0]
+                
             pred = model(weight, bias)
-            loss = loss_func(pred, target) * args.w_loss
+            loss = loss_func(pred, target) * args.w_loss + args.reg
 
             optimizer.zero_grad()
             loss.backward()
@@ -85,13 +82,13 @@ def train(args):
             pred = model(weight, bias)
         
             prob = F.softmax(pred, dim=-1)
-            max_idx, predicted = torch.max(pred, 1)
+            _, predicted = torch.max(pred, 1)
             acc_v = torch.sum(predicted==target) / target.shape[0]
             
             if iter % 100 == 0:
                 print("================================")
                 print("prediction\t target\n")
-                for p, t, pr, i in zip(predicted, target, prob, max_idx):
+                for p, t, pr in zip(predicted, target, prob):
                     print(f"{class_dict[p.item()]}({pr[p]:.2f})\t{class_dict[t.item()]}")
                 print("================================")
                 
@@ -118,10 +115,12 @@ def parse_args():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--iter', default=1000, type=int) #
     parser.add_argument('--bs', default=288, type=int) #
-    parser.add_argument('--model', default='fc', choices=['fc', 'fc_drop', 'fc_bn', 'fc_bn_drop', 'fc_in', 'fc_in_drop', 'fc_light', 'fc_heavy'])
+    parser.add_argument('--model', default='base', type=str)
     parser.add_argument('--w_loss', default=1.0, type=float)
     parser.add_argument('--lr', default=0.001, type=float)
     parser.add_argument('--exp', type=str, default='exp')
+    parser.add_argument('--reg', type=float, default=0.0)
+    parser.add_argument('--normalize', action='store_true', default = False)
     args = parser.parse_args()
     
     print(args)
