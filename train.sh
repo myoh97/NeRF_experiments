@@ -1,1 +1,1 @@
-CUDA_VISIBLE_DEVICES=9 python run_nerf.py --N_iter 100000 --config configs/ficus.txt --N_rand 512 --rgb bgr --expname fix/exp;
+CUDA_VISIBLE_DEVICES=8 python run_nerf.py --N_iter 100000 --config configs/ficus.txt --N_rand 512 --rgb bgr --expname fix/exp;

@@ -11,14 +11,9 @@ from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 
 class_dict = {
-    0:"chair",
-    1:"drums",
-    2:"ficus",
-    3:"hotdog",
-    4:"lego",
-    5:"materials",
-    6:"mic",
-    7:"ship"
+    0:"sofa",
+    1:"chair",
+    2:"table"
     }
 
 def test(args):
@@ -27,18 +22,15 @@ def test(args):
     bs = args.bs
     n_iter = args.iter
     
-    if args.model == 'fc' : model = FCLayer(batchsize=bs).to(device)
-    elif args.model =='fc_drop': model = FCLayer_dropout(batchsize=bs).to(device)
-    elif args.model =='fc_light': model = FCLayer_light(batchsize=bs).to(device)
-    elif args.model =='fc_heavy': model = FCLayer_heavy(batchsize=bs).to(device)
-    elif args.model =='fc_bn': model = FCLayer_BN(batchsize=bs).to(device)
-    elif args.model =='fc_in': model = FCLayer_IN(batchsize=bs).to(device)
-    elif args.model =='fc_bn_drop': model = FCLayer_BN(batchsize=bs).to(device)
-    elif args.model =='fc_in_drop': model = FCLayer_IN_dropout(batchsize=bs).to(device)
-
-    val_dataset = NeRFDataset(train=False)
-    val_dataloader = DataLoader(val_dataset, batch_size=288, shuffle=False, num_workers=0)
+    val_dataset = NeRFDataset(train=False, pop_layer=args.pop_layer)
+    val_dataloader = DataLoader(val_dataset, batch_size=100, shuffle=False, num_workers=0)
     ckpt = torch.load(args.ckpt)
+    
+    len_w = val_dataset.len_w
+    len_b = val_dataset.len_b
+    
+    if args.model == 'base' : model = Baseline(len_w=len_w, len_b=len_b).to(device)
+    save_path = os.path.dirname(args.ckpt)
     
     model.load_state_dict(ckpt['state_dict'])
     
@@ -64,14 +56,21 @@ def test(args):
     print(f"Accuracy : {acc_v:.4f}")
 
     end = time.time()
+    
+    f = open(os.path.join(save_path, 'result.json'), 'w')
+    f.writelines([f"Accuracy : {acc_v:.4f}", "\n", "================================", "\n"])
+    f.writelines("\n".join([f"{class_dict[p.item()]}({pr[p]:.2f})\t{class_dict[t.item()]}" for p, t, pr in zip(predicted, target, prob)]))
+    f.close()
+    
     print(f"{end - start:.5f} sec")
     
 def parse_args():
     # Training settings
     parser = argparse.ArgumentParser(description='')
+    parser.add_argument('--pop_layer', type=int, default=None)
     parser.add_argument('--iter', default=1000, type=int) #
     parser.add_argument('--bs', default=288, type=int) #
-    parser.add_argument('--model', default='fc', choices=['fc', 'fc_drop', 'fc_bn', 'fc_bn_drop', 'fc_in', 'fc_in_drop', 'fc_light', 'fc_heavy'])
+    parser.add_argument('--model', default='base')
     parser.add_argument('--w_loss', default=1.0, type=float)
     parser.add_argument('--lr', default=0.001, type=float)
     parser.add_argument('--exp', type=str, default='exp')

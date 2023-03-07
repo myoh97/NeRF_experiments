@@ -1,1 +1,9 @@
-CUDA_VISIBLE_DEVICES=6 python test.py --model fc --ckpt results/fc/fc_bs288_iter1000/iter999_0.7847.tar
+CUDA_VISIBLE_DEVICES=8 python test.py --model base --ckpt results/furniture/base_bs362_iter1500/best_ckpt.tar
+# CUDA_VISIBLE_DEVICES=8 python test.py --model base --ckpt results/furniture_pop0/base_bs362_iter700_pop0/best_ckpt.tar --pop_layer 0
+# CUDA_VISIBLE_DEVICES=8 python test.py --model base --ckpt results/furniture_pop1/base_bs362_iter700_pop1/best_ckpt.tar --pop_layer 1 
+# CUDA_VISIBLE_DEVICES=8 python test.py --model base --ckpt results/furniture_pop2/base_bs362_iter700_pop2/best_ckpt.tar --pop_layer 2
+# CUDA_VISIBLE_DEVICES=8 python test.py --model base --ckpt results/furniture_pop3/base_bs362_iter700_pop3/best_ckpt.tar --pop_layer 3
+# CUDA_VISIBLE_DEVICES=8 python test.py --model base --ckpt results/furniture_pop4/base_bs362_iter700_pop4/best_ckpt.tar --pop_layer 4
+# CUDA_VISIBLE_DEVICES=8 python test.py --model base --ckpt results/furniture_pop5/base_bs362_iter700_pop5/best_ckpt.tar --pop_layer 5
+# CUDA_VISIBLE_DEVICES=8 python test.py --model base --ckpt results/furniture_pop6/base_bs362_iter700_pop6/best_ckpt.tar --pop_layer 6
+# CUDA_VISIBLE_DEVICES=8 python test.py --model base --ckpt results/furniture_pop7/base_bs362_iter700_pop7/best_ckpt.tar --pop_layer 7

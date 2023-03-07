@@ -44,7 +44,12 @@
             "type": "python",
             "request": "launch",
             "program": "classification/train.py",
-            "env": {"CUDA_VISIBLE_DEVICES":"3"},
+            "env": {"CUDA_VISIBLE_DEVICES":"7"},
+            "args":[
+                "--model", "base",
+                "--exp", "debug",
+                "--pop_layer", "views"
+            ],
             "console": "integratedTerminal",
             "justMyCode": true
         },
